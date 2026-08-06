@@ -42,5 +42,3 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek ini di komputer lokal And
    ```bash
    git clone [https://github.com/username/cashpilot.git](https://github.com/username/cashpilot.git)
    cd cashpilot
-pip install customtkinter pillow matplotlib reportlab openpyxl python-docx tkcalendar
-python main.py
