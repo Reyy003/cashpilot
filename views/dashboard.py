@@ -64,7 +64,7 @@ class Dashboard(ctk.CTk):
         self.resizable(True, True)
         self.after(0, lambda: self.state('zoomed'))
 
-        # Latar belakang jendela utama
+        # Latar belakang jendela utama (Nuansa Modern Slate)
         self.configure(fg_color=("#f1f5f9", "#0f172a"))
 
         # ==============================
@@ -355,27 +355,64 @@ class Dashboard(ctk.CTk):
     def show_dashboard(self):
         self.clear_content()
 
-        header_frame = ctk.CTkFrame(self.content, fg_color="transparent")
-        header_frame.pack(fill="x", padx=25, pady=(20, 10))
+        # ==========================================
+        # DEKORATIF HEADER BANNER (Gaya Modern Card)
+        # ==========================================
+        header_banner = ctk.CTkFrame(
+            self.content,
+            fg_color=("#f8fafc", "#162032"),
+            corner_radius=16,
+            border_width=1,
+            border_color=("#e2e8f0", "#2a3950")
+        )
+        header_banner.pack(fill="x", padx=25, pady=(20, 15))
+
+        banner_inner = ctk.CTkFrame(header_banner, fg_color="transparent")
+        banner_inner.pack(fill="both", expand=True, padx=20, pady=16)
+
+        # Kiri: Judul & Subjudul
+        title_box = ctk.CTkFrame(banner_inner, fg_color="transparent")
+        title_box.pack(side="left", fill="x", expand=True)
 
         ctk.CTkLabel(
-            header_frame,
-            text="Dashboard",
-            font=("Arial", 28, "bold"),
+            title_box,
+            text="🚀 Dashboard Overview",
+            font=("Arial", 22, "bold"),
             text_color=("#0f172a", "#ffffff")
         ).pack(anchor="w")
 
         ctk.CTkLabel(
-            header_frame,
-            text="Pantau statistik keuangan dan proyek kamu dalam satu tempat.",
+            title_box,
+            text="Pantau statistik keuangan dan performa proyek kamu dalam satu kendali.",
             font=("Arial", 12),
             text_color=("#64748b", "#94a3b8")
-        ).pack(anchor="w")
+        ).pack(anchor="w", pady=(2, 0))
 
+        # Kanan: Badge Status / Indikator Aktif
+        status_badge = ctk.CTkFrame(
+            banner_inner,
+            fg_color=("#f3e8ff", "#2e1065"),
+            corner_radius=10,
+            border_width=1,
+            border_color=("#d8b4fe", "#581c87")
+        )
+        status_badge.pack(side="right", padx=(10, 0))
+
+        ctk.CTkLabel(
+            status_badge,
+            text="⚡ Live Active",
+            font=("Arial", 11, "bold"),
+            text_color=("#7c3aed", "#c084fc")
+        ).pack(padx=12, pady=6)
+
+        # Ambil data ringkasan
         data = get_dashboard_summary(self.user_id)
 
+        # ==========================================
+        # CARD GRID STATISTIK
+        # ==========================================
         card_grid = ctk.CTkFrame(self.content, fg_color="transparent")
-        card_grid.pack(fill="x", padx=20, pady=(10, 15))
+        card_grid.pack(fill="x", padx=20, pady=(5, 15))
 
         for i in range(4):
             card_grid.grid_columnconfigure(i, weight=1, uniform="card")
@@ -388,17 +425,22 @@ class Dashboard(ctk.CTk):
         self.create_chart()
 
     def card(self, parent, col, title, value, icon, accent_color, badge_bg):
+        # Kartu Statistik dengan Border Halus & Aksen Garis di Samping/Atas
         frame = ctk.CTkFrame(
             parent,
             corner_radius=16,
-            fg_color=("#ffffff", "#0f172a"),
+            fg_color=("#ffffff", "#162032"),
             border_width=1,
-            border_color=("#e2e8f0", "#1e293b")
+            border_color=("#e2e8f0", "#2a3950")
         )
         frame.grid(row=0, column=col, padx=8, pady=5, sticky="ew")
 
+        # Indikator garis warna tipis di bagian atas kartu sebagai hiasan modern
+        top_accent_line = ctk.CTkFrame(frame, height=4, fg_color=accent_color, corner_radius=2)
+        top_accent_line.pack(fill="x", padx=12, pady=(12, 0))
+
         card_inner = ctk.CTkFrame(frame, fg_color="transparent")
-        card_inner.pack(fill="both", expand=True, padx=15, pady=15)
+        card_inner.pack(fill="both", expand=True, padx=15, pady=(10, 15))
 
         top_frame = ctk.CTkFrame(card_inner, fg_color="transparent")
         top_frame.pack(fill="x")
@@ -425,7 +467,7 @@ class Dashboard(ctk.CTk):
         ctk.CTkLabel(
             card_inner,
             text=value,
-            font=("Arial", 20, "bold"),
+            font=("Arial", 18, "bold"),
             text_color=("#0f172a", "#ffffff"),
             anchor="w"
         ).pack(fill="x", pady=(10, 0))
@@ -462,19 +504,19 @@ class Dashboard(ctk.CTk):
 
         chart_frame = ctk.CTkFrame(
             self.content,
-            fg_color=("#ffffff", "#0f172a"),
+            fg_color=("#ffffff", "#162032"),
             corner_radius=18,
             border_width=1,
-            border_color=("#e2e8f0", "#1e293b")
+            border_color=("#e2e8f0", "#2a3950")
         )
         chart_frame._is_chart_container = True
-        chart_frame.pack(padx=20, pady=10, fill="both", expand=True)
+        chart_frame.pack(padx=20, pady=(5, 15), fill="both", expand=True)
 
         is_dark = ctk.get_appearance_mode().lower() == "dark"
-        bg_color = "#0f172a" if is_dark else "#ffffff"
+        bg_color = "#162032" if is_dark else "#ffffff"
         text_color = "#ffffff" if is_dark else "#0f172a"
 
-        fig = Figure(figsize=(8.6, 3.8), dpi=100)
+        fig = Figure(figsize=(8.6, 3.5), dpi=100)
         fig.patch.set_facecolor(bg_color)
         ax = fig.add_subplot(111)
         ax.set_facecolor(bg_color)
