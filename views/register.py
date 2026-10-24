@@ -5,6 +5,7 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageOps
 from tkinter import filedialog
 import customtkinter as ctk
+import bcrypt
 
 # Import query register & notifikasi
 from query import register_user
@@ -308,7 +309,18 @@ class RegisterPage(ctk.CTk):
 
         # Simpan ke Database melalui query.py
         try:
-            success, msg = register_user(username, password, nama, saved_pic_path)
+            # Hash password sebelum dikirim untuk disimpan ke database
+            password_hash = bcrypt.hashpw(
+                password.encode("utf-8"),
+                bcrypt.gensalt()
+            ).decode("utf-8")
+
+            success, msg = register_user(
+                username,
+                password_hash,
+                nama,
+                saved_pic_path
+            )
             if success:
                 Notification(self, "success", "Registrasi berhasil! Silahkan login.")
                 self.after(1500, self.open_login)

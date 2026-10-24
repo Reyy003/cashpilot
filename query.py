@@ -1,4 +1,6 @@
 from database import get_connection
+import bcrypt
+from database import get_connection
 
 
 # =====================================================
@@ -8,14 +10,75 @@ from database import get_connection
 def check_login(username, password):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+
     try:
+        # Cari akun berdasarkan username
         query = """
-        SELECT *
-        FROM users
-        WHERE username=%s AND password=%s
+            SELECT *
+            FROM users
+            WHERE username = %s
+            LIMIT 1
         """
-        cursor.execute(query, (username, password))
-        return cursor.fetchone()
+        cursor.execute(query, (username,))
+        user = cursor.fetchone()
+
+        # Username tidak ditemukan
+        if not user:
+            return None
+
+        password_db = user.get("password")
+
+        if not password_db:
+            return None
+
+        password_db = password_db.encode("utf-8")
+        password_input = password.encode("utf-8")
+
+        # Periksa apakah password di database sudah berbentuk hash
+        is_bcrypt_hash = password_db.startswith(
+            (b"$2a$", b"$2b$", b"$2y$")
+        )
+
+        if is_bcrypt_hash:
+            # Verifikasi password yang sudah di-hash
+            try:
+                valid = bcrypt.checkpw(
+                    password_input,
+                    password_db
+                )
+            except ValueError:
+                valid = False
+
+        else:
+            # Kompatibilitas untuk password lama berbentuk teks biasa
+            valid = password_input == password_db
+
+            if valid:
+                # Otomatis hash password lama setelah login berhasil
+                new_hash = bcrypt.hashpw(
+                    password_input,
+                    bcrypt.gensalt()
+                ).decode("utf-8")
+
+                cursor.execute(
+                    """
+                    UPDATE users
+                    SET password = %s
+                    WHERE username = %s
+                    """,
+                    (new_hash, username)
+                )
+
+                conn.commit()
+
+                # Perbarui data user yang dikembalikan
+                user["password"] = new_hash
+
+        if valid:
+            return user
+
+        return None
+
     finally:
         cursor.close()
         conn.close()
